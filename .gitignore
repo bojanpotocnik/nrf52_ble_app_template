@@ -1,0 +1,17 @@
+# PyCharm
+.idea/misc.xml
+
+# Keil uVision workspace files
+*.uvguix.*
+# Keil uVision build directories
+/**/_build/
+
+# Symbolic link to nRF5 SDK (device specific)
+nRF5_SDK_15
+
+# CMake files
+cmake-build-debug
+
+# J-Link logs and settings (machine and user specific)
+JLinkLog.txt
+JLinkSettings.ini
