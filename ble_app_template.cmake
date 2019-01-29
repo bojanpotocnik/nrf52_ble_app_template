@@ -142,6 +142,7 @@ set(INCLUDE_DIRS_ASM
 
 # C specific include directories
 set(INCLUDE_DIRS_C
+	version
 )
 
 
@@ -196,6 +197,7 @@ set(SOURCES_ASM
 set(SOURCES_C
 	# Application
 	main.c
+	version/version.c
 	# Board Definition
 	nRF5_SDK_15/components/boards/boards.c
 	# Board Support

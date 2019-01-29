@@ -37,26 +37,18 @@ add_definitions(-include cmake_cross_platform.h)
 
 add_definitions(
         ${nRF5_SDK_DEFINES}
-        # User defines
-
 )
 
 remove_definitions(
         ${nRF5_SDK_UNDEFINES}
-        # User undefines
-
 )
 
 include_directories(
         ${nRF5_SDK_INCLUDE_DIRS}
         CMSIS/Include # Additional CMSIS includes for NVIC functions
-        # User include directories
-
 )
 
 
 add_executable(${PROJECT_NAME}
         ${nRF5_SDK_SOURCE_FILES}
-        # User source files
-        main.c
         )
