@@ -1,6 +1,3 @@
-#ifndef _CMAKE_CROSS_PLATFORM_H
-#define _CMAKE_CROSS_PLATFORM_H
-
 /* The SDK does not include system include files if build is cross-platform build.
  * Proper toolchain can be defined in the CMake, but that requires more effort and complications.
  * As a workaround this file is included with
@@ -9,6 +6,9 @@
  *
  * The following is copied from nRF5_SDK_15/components/modules/nrfx/mdk/nrf.h,
  * undef's are added to prevent not-including the files.
+ *
+ * Include guards are not required as this file does not define anything,
+ * but it shall always un-define specified defines.
  */
 
 #if defined(_WIN32)
@@ -28,6 +28,3 @@
 
 
 /* Include all ARM and nRF system files. */
-
-
-#endif /* _CMAKE_CROSS_PLATFORM_H */

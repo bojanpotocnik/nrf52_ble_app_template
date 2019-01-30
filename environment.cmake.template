@@ -1,0 +1,8 @@
+# Root path of the used Keil ARM Compiler
+set(ARM_COMPILER_ROOT "C:/Keil_v5/ARM/ARMCC")
+
+# Version of the ARM Compiler (if not sure, leave it as 6010050)
+set(ARM_COMPILER_VERSION 6010050)
+
+# Root path of the used CMSIS package
+set(CMSIS_ROOT "C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.4.0/CMSIS")

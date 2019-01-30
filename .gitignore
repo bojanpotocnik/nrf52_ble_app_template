@@ -9,7 +9,10 @@
 # Symbolic link to nRF5 SDK (device specific)
 nRF5_SDK_15
 
-# CMake files
+# Machine-specific CMake definitions
+environment.cmake
+
+# CMake generated files
 cmake-build-debug
 
 # J-Link logs and settings (machine and user specific)

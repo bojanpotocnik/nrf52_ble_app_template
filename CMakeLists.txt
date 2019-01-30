@@ -2,53 +2,51 @@ cmake_minimum_required(VERSION 3.6)
 
 project(nrf52_ble_app_template)
 
-# Inluce properties derived from the Keil uVision Project File
-include(ble_app_template.cmake)
-set(nRF5_SDK_DEFINES
-        ${DEFINES_COMMON}
-        ${DEFINES_ASM}
-        ${DEFINES_C})
-set(nRF5_SDK_UNDEFINES
-        ${UNDEFINES_COMMON}
-        ${UNDEFINES_ASM}
-        ${UNDEFINES_C})
-set(nRF5_SDK_INCLUDE_DIRS
-        ${INCLUDE_DIRS_COMMON}
-        ${INCLUDE_DIRS_ASM}
-        ${INCLUDE_DIRS_C})
-set(nRF5_SDK_SOURCE_FILES
-        ${SOURCES_COMMON}
-        ${SOURCES_ASM}
-        ${SOURCES_C}
-        )
+# Load machine-specific definitions (edit and rename environment.cmake.template)
+include(environment.cmake)
 
 
 # Enable "fake cross-platform" build.
-# First, include host system files
+# 1) Include CMSIS directories as system include directories
 include_directories(BEFORE SYSTEM
-        C:/msys64/mingw64/include
-        C:/msys64/mingw64/x86_64-w64-mingw32/include
-        . # This directory, to find cmake_cross_platform.h
+        "${ARM_COMPILER_ROOT}/include"
+        "${CMSIS_ROOT}/Include"
         )
-# Aftwerwards undefine all host definitions.
-add_definitions(-include cmake_cross_platform.h)
+# 2) Include this directory, to find cmake_cross_platform.h
+include_directories(.)
+# 3) Trick compiler into ignoring the host machine and compiler
+add_definitions(
+        # Undefine all host definitions.
+        -include cmake_cross_platform.h
+        # Fake the ARM Compiler
+        -D__ARMCC_VERSION=${ARM_COMPILER_VERSION}
+)
 
 
+# Inluce properties derived from the Keil uVision Project File
+include(ble_app_template.cmake)
 
 add_definitions(
-        ${nRF5_SDK_DEFINES}
+        ${DEFINES_COMMON}
+        ${DEFINES_ASM}
+        ${DEFINES_C}
 )
 
 remove_definitions(
-        ${nRF5_SDK_UNDEFINES}
+        ${UNDEFINES_COMMON}
+        ${UNDEFINES_ASM}
+        ${UNDEFINES_C}
 )
 
 include_directories(
-        ${nRF5_SDK_INCLUDE_DIRS}
+        ${INCLUDE_DIRS_COMMON}
+        ${INCLUDE_DIRS_ASM}
+        ${INCLUDE_DIRS_C}
         CMSIS/Include # Additional CMSIS includes for NVIC functions
 )
 
-
 add_executable(${PROJECT_NAME}
-        ${nRF5_SDK_SOURCE_FILES}
+        ${SOURCES_COMMON}
+        ${SOURCES_ASM}
+        ${SOURCES_C}
         )
