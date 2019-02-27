@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 
+set(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_SYSTEM_PROCESSOR arm)
 project(nrf52_ble_app_template)
 
 # Load machine-specific definitions (edit and rename environment.cmake.template)
@@ -7,6 +9,7 @@ include(environment.cmake)
 
 
 # Enable "fake cross-platform" build.
+set(CMAKE_SYSROOT ${ARM_COMPILER_ROOT})
 # 1) Include CMSIS directories as system include directories
 include_directories(BEFORE SYSTEM
         "${ARM_COMPILER_ROOT}/include"

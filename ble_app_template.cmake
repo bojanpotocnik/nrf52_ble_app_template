@@ -1,6 +1,42 @@
 # Made with CMake <> uVision project file synchronizer# https://github.com/bojanpotocnik/cmake-uvision-syncer
 
 
+# Common definitions
+set(DEFINES_COMMON
+	-DCONFIG_GPIO_AS_PINRESET
+	-DFLOAT_ABI_HARD
+	-DNRF52840_XXAA
+	-DNRF_SD_BLE_API_VERSION=6
+	-DS140
+	-DSOFTDEVICE_PRESENT
+	-DSWI_DISABLE0
+	-D__HEAP_SIZE=8192
+	-D__STACK_SIZE=8192
+)
+
+# Assembler specific definitions
+set(DEFINES_ASM
+)
+
+# C specific definitions
+set(DEFINES_C
+)
+
+
+# Common un-defines
+set(UNDEFINES_COMMON
+	
+)
+
+# Assembler specific un-defines
+set(UNDEFINES_ASM
+)
+
+# C specific un-defines
+set(UNDEFINES_C
+)
+
+
 # Common include directories
 set(INCLUDE_DIRS_COMMON
 	nRF5_SDK_15/components
@@ -143,43 +179,7 @@ set(INCLUDE_DIRS_ASM
 # C specific include directories
 set(INCLUDE_DIRS_C
 	version
-)
-
-
-# Common definitions
-set(DEFINES_COMMON
-	-DBOARD_PCA10056
-	-DCONFIG_GPIO_AS_PINRESET
-	-DFLOAT_ABI_HARD
-	-DNRF52840_XXAA
-	-DNRF_SD_BLE_API_VERSION=6
-	-DS140
-	-DSOFTDEVICE_PRESENT
-	-DSWI_DISABLE0
-	-D__HEAP_SIZE=8192
-	-D__STACK_SIZE=8192
-)
-
-# Assembler specific definitions
-set(DEFINES_ASM
-)
-
-# C specific definitions
-set(DEFINES_C
-)
-
-
-# Common un-defines
-set(UNDEFINES_COMMON
-
-)
-
-# Assembler specific un-defines
-set(UNDEFINES_ASM
-)
-
-# C specific un-defines
-set(UNDEFINES_C
+	ble
 )
 
 
@@ -275,6 +275,8 @@ set(SOURCES_C
 	nRF5_SDK_15/components/softdevice/common/nrf_sdh.c
 	nRF5_SDK_15/components/softdevice/common/nrf_sdh_ble.c
 	nRF5_SDK_15/components/softdevice/common/nrf_sdh_soc.c
+	# Application - BLE
+	ble/app_ble.c
 	# RTE::Device
 	RTE/Device/nRF52840_xxAA/system_nrf52840.c
 )
