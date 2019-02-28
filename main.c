@@ -10,8 +10,7 @@
  * and if no new connection created go back to system-off mode.
  *
  * It can easily be used as a starting point for creating a new application, the
- * comments identified with 'YOUR_JOB', 'FIXME' and 'TODO' indicates where and
- * how you can customize.
+ * comments identified with 'YOUR_JOB' indicates where and how you can customize.
  */
 
 #include <stdbool.h>

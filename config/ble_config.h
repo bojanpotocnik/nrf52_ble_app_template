@@ -79,9 +79,9 @@
 #define MAX_CONN_INTERVAL   MSEC_TO_UNITS(500, UNIT_1_25_MS)    /**< Maximum acceptable connection interval (in 1.25 ms units). */
 
 /** Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (in app-timer ticks). */
-#define FIRST_CONN_PARAMS_UPDATE_DELAY  APP_TIMER_TICKS(5000)
+#define FIRST_CONN_PARAMS_UPDATE_DELAY  APP_TIMER_TICKS(1000)
 /** Time between each call to sd_ble_gap_conn_param_update after the first call (in app-timer ticks). */
-#define NEXT_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(30000)
+#define NEXT_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(2000)
 /** Number of attempts before giving up the connection parameter negotiation. */
 #define MAX_CONN_PARAMS_UPDATE_COUNT    3
 

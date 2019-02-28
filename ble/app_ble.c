@@ -54,10 +54,8 @@ NRF_BLE_QWR_DEF(m_qwr);                     /**< Context for the Queued Write mo
 BLE_ADVERTISING_DEF(m_advertising);         /**< Advertising module instance. */
 
 BLE_BAS_DEF(m_bas);                         /**< Battery Service instance. */
-/* FIXME: Declare all other services structure your application is using */
+// YOUR_JOB: Declare all other services structure your application is using
 
-
-// YOUR_JOB: Use UUIDs for service(s) used in your application.
 
 /** Device's current transmit power level when in a connection.
  *  Supported values: -40dBm, -20dBm, -16dBm, -12dBm, -8dBm, -4dBm, 0dBm, +2dBm,
@@ -65,12 +63,14 @@ BLE_BAS_DEF(m_bas);                         /**< Battery Service instance. */
  */
 static int8_t m_tx_power = 0;
 
+// The whole advertising packet cannot be larger than default MTU length, therefore device name
+// also cannot be larger (minus 1 B for OP-Code and 2 B for Handle, plus null termination).
+static char ble_device_name[BLE_GATT_ATT_MTU_DEFAULT - 3 + 1];
 
-/** The UUIDs for service(s) used in the application.
- *  FIXME: Add your services.
- */
+/** The UUIDs for service(s) used in the application. */
 static ble_uuid_t m_adv_uuids[] = {
     {BLE_UUID_DEVICE_INFORMATION_SERVICE, BLE_UUID_TYPE_BLE}
+    // YOUR_JOB: Use UUIDs for service(s) used in your application.
 };
 
 /** Advertising configuration, initially initialized in advertising_init().
@@ -148,7 +148,8 @@ static ble_advertising_init_t m_adv_init = {
 };
 
 
-static uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID;                        /**< Handle of the current connection. */
+/** Handle of the current connection. */
+static uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID;
 
 
 // region Public functions
@@ -174,19 +175,27 @@ void ble_stack_init(void) {
 }
 
 
-void gap_params_init(void) {
-    ret_code_t err_code;
-    ble_gap_conn_params_t gap_conn_params = {0};
+void ble_set_device_name(const char *name) {
     ble_gap_conn_sec_mode_t sec_mode;
 
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
 
-    err_code = sd_ble_gap_device_name_set(&sec_mode,
-                                          (const uint8_t *) DEVICE_NAME,
-                                          strlen(DEVICE_NAME));
-    APP_ERROR_CHECK(err_code);
+    strncat(ble_device_name, name, sizeof(ble_device_name) - 1);
 
-    // TODO: Use an appearance value matching the application's use case.
+    ret_code_t err_code = sd_ble_gap_device_name_set(&sec_mode,
+                                                     (const uint8_t *) ble_device_name,
+                                                     (uint16_t) strlen(ble_device_name));
+    APP_ERROR_CHECK(err_code);
+}
+
+
+void gap_params_init(void) {
+    ret_code_t err_code;
+    ble_gap_conn_params_t gap_conn_params = {0};
+
+    set_ble_device_name(DEVICE_NAME);
+
+    // YOUR_JOB: Use an appearance value matching the application's use case.
     err_code = sd_ble_gap_appearance_set(BLE_APPEARANCE_UNKNOWN);
     APP_ERROR_CHECK(err_code);
 
@@ -219,23 +228,6 @@ void advertising_init(void) {
     err_code = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, m_advertising.adv_handle, m_tx_power);
     APP_ERROR_CHECK(err_code);
 }
-
-
-void advertising_start(bool erase_bonds) {
-    if (erase_bonds == true) {
-        NRF_LOG_INFO("Erase bonds!");
-
-        ret_code_t err_code = pm_peers_delete();
-        APP_ERROR_CHECK(err_code);
-        // Advertising is started by PM_EVT_PEERS_DELETED_SUCEEDED event
-    }
-    else {
-        ret_code_t err_code = ble_advertising_start(&m_advertising, BLE_ADV_MODE_FAST);
-
-        APP_ERROR_CHECK(err_code);
-    }
-}
-
 
 void services_init(void) {
     ret_code_t err_code;
@@ -311,7 +303,7 @@ void services_init(void) {
     // endregion Initialize Battery Service
 
 
-    /* FIXME: Add code to initialize the services used by the application.
+    /* YOUR_JOB: Add code to initialize the services used by the application.
        ble_xxs_init_t                     xxs_init;
        ble_yys_init_t                     yys_init;
 
@@ -322,6 +314,9 @@ void services_init(void) {
        xxs_init.is_xxx_notify_supported    = true;
        xxs_init.ble_xx_initial_value.level = 100;
 
+       // Update maximum characteristic length
+       max_char_length = MAX(max_char_length, sizeof(ble_xxs_data_t));
+
        err_code = ble_bas_init(&m_xxs, &xxs_init);
        APP_ERROR_CHECK(err_code);
 
@@ -329,6 +324,10 @@ void services_init(void) {
        memset(&yys_init, 0, sizeof(yys_init));
        yys_init.evt_handler                  = on_yys_evt;
        yys_init.ble_yy_initial_value.counter = 0;
+
+       // Update maximum characteristic length
+       max_char_length = MAX(max_char_length, sizeof(ble_xxy_char_abc_data_t));
+       max_char_length = MAX(max_char_length, sizeof(ble_xxy_char_123_data_t));
 
        err_code = ble_yy_service_init(&yys_init, &yy_init);
        APP_ERROR_CHECK(err_code);
@@ -399,6 +398,27 @@ void peer_manager_init(void) {
 
     err_code = pm_register(on_peer_manager_event);
     APP_ERROR_CHECK(err_code);
+}
+
+
+void advertising_start(bool erase_bonds) {
+    if (erase_bonds == true) {
+        NRF_LOG_INFO("Erase bonds!");
+
+        ret_code_t err_code = pm_peers_delete();
+        APP_ERROR_CHECK(err_code);
+        // Advertising is started by PM_EVT_PEERS_DELETED_SUCEEDED event
+    }
+    else {
+        ret_code_t err_code = ble_advertising_start(&m_advertising, BLE_ADV_MODE_FAST);
+
+        APP_ERROR_CHECK(err_code);
+    }
+}
+
+
+bool ble_is_device_connected(void) {
+    return (m_conn_handle != BLE_CONN_HANDLE_INVALID);
 }
 
 // endregion Public functions
@@ -512,7 +532,7 @@ static void on_gatt_event(nrf_ble_gatt_t *p_gatt, nrf_ble_gatt_evt_t const *p_ev
             break;
     }
 
-    // TODO: Call any service-specific GATT event handler or update their MTU/data sizes.
+    // YOUR_JOB: Call any service-specific GATT event handler or update their MTU/data sizes.
     // ble_xxx_on_gatt_evt(&m_xxx, p_evt);
 }
 
