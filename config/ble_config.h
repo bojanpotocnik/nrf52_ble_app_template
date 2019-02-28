@@ -10,9 +10,11 @@
 #ifndef BLE_CONFIG_H_INCLUDED
 #define BLE_CONFIG_H_INCLUDED
 
+#include <stdbool.h>
 #include "app_util.h"
 #include "ble_gap.h"
 #include "app_timer.h"
+
 
 /* Many of the parameters below are set based on the following document:
  *
@@ -84,14 +86,14 @@
 #define MAX_CONN_PARAMS_UPDATE_COUNT    3
 
 /* Security Parameters */
-#define SEC_PARAM_BOND                  1                                       /**< Perform bonding. */
-#define SEC_PARAM_MITM                  0                                       /**< Man In The Middle protection not required. */
-#define SEC_PARAM_LESC                  0                                       /**< LE Secure Connections not enabled. */
-#define SEC_PARAM_KEYPRESS              0                                       /**< Keypress notifications not enabled. */
-#define SEC_PARAM_IO_CAPABILITIES       BLE_GAP_IO_CAPS_NONE                    /**< No I/O capabilities. */
-#define SEC_PARAM_OOB                   0                                       /**< Out Of Band data not available. */
-#define SEC_PARAM_MIN_KEY_SIZE          7                                       /**< Minimum encryption key size. */
-#define SEC_PARAM_MAX_KEY_SIZE          16                                      /**< Maximum encryption key size. */
+#define SEC_PARAM_BOND                  true                                /**< Whether to Perform bonding. */
+#define SEC_PARAM_MITM                  false                               /**< Whether the Man In The Middle protection is required. */
+#define SEC_PARAM_LESC                  false                               /**< Whether the LE Secure Connections is enabled. */
+#define SEC_PARAM_KEYPRESS              false                               /**< Whether the Keypress notifications are enabled. */
+#define SEC_PARAM_IO_CAPABILITIES       BLE_GAP_IO_CAPS_NONE                /**< Available I/O capabilities. */
+#define SEC_PARAM_OOB                   false                               /**< Whether the Out Of Band data is available. */
+#define SEC_PARAM_MIN_KEY_SIZE          7                                   /**< Minimum encryption key size. */
+#define SEC_PARAM_MAX_KEY_SIZE          16                                  /**< Maximum encryption key size. */
 
 
 /* 11.4 Advertising Data

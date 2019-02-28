@@ -298,8 +298,8 @@
               </OCR_RVCT8>
               <OCR_RVCT9>
                 <Type>0</Type>
-                <StartAddress>0x20002210</StartAddress>
-                <Size>0x3ddf0</Size>
+                <StartAddress>0x20002ab8</StartAddress>
+                <Size>0x3d548</Size>
               </OCR_RVCT9>
               <OCR_RVCT10>
                 <Type>0</Type>

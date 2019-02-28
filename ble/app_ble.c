@@ -37,13 +37,15 @@
 #define APP_BLE_CONN_CFG_TAG 1              /**< A tag identifying the SoftDevice BLE configuration. */
 
 
-static void ble_evt_handler(ble_evt_t const *p_ble_evt, void *p_context);
+static void on_ble_event(ble_evt_t const *p_ble_evt, void *p_context);
 
-static void on_adv_evt(ble_adv_evt_t ble_adv_evt);
+static void on_gatt_event(nrf_ble_gatt_t *p_gatt, nrf_ble_gatt_evt_t const *p_evt);
 
-static void on_conn_params_evt(ble_conn_params_evt_t *p_evt);
+static void on_advertising_event(ble_adv_evt_t ble_adv_evt);
 
-static void pm_evt_handler(pm_evt_t const *p_evt);
+static void on_conn_params_event(ble_conn_params_evt_t *p_evt);
+
+static void on_peer_manager_event(pm_evt_t const *p_evt);
 
 
 NRF_BLE_GATT_DEF(m_gatt);                   /**< GATT module instance. */
@@ -140,7 +142,7 @@ static ble_advertising_init_t m_adv_init = {
         .ble_adv_extended_enabled = false
     },
     // Event handler that will be called upon advertising events
-    .evt_handler = on_adv_evt,
+    .evt_handler = on_advertising_event,
     // Error handler that will propagate internal errors to the main applications.
     .error_handler = app_error_handler_bare
 };
@@ -168,7 +170,7 @@ void ble_stack_init(void) {
     APP_ERROR_CHECK(err_code);
 
     // Register a handler for BLE events.
-    NRF_SDH_BLE_OBSERVER(m_ble_observer, APP_BLE_OBSERVER_PRIO, ble_evt_handler, NULL);
+    NRF_SDH_BLE_OBSERVER(m_ble_observer, APP_BLE_OBSERVER_PRIO, on_ble_event, NULL);
 }
 
 
@@ -199,7 +201,7 @@ void gap_params_init(void) {
 
 
 void gatt_init(void) {
-    ret_code_t err_code = nrf_ble_gatt_init(&m_gatt, NULL);
+    ret_code_t err_code = nrf_ble_gatt_init(&m_gatt, on_gatt_event);
     APP_ERROR_CHECK(err_code);
 }
 
@@ -237,6 +239,7 @@ void advertising_start(bool erase_bonds) {
 
 void services_init(void) {
     ret_code_t err_code;
+    uint16_t max_char_length = 0;
 
     // region Initialize Queued Write Module
     nrf_ble_qwr_init_t qwr_init = {0};
@@ -270,6 +273,23 @@ void services_init(void) {
 
     dis_init.dis_char_rd_sec = SEC_OPEN;
 
+    // Check for maximum length
+    max_char_length = MAX(max_char_length, dis_init.manufact_name_str.length);
+    max_char_length = MAX(max_char_length, dis_init.model_num_str.length);
+    max_char_length = MAX(max_char_length, dis_init.serial_num_str.length);
+    max_char_length = MAX(max_char_length, dis_init.hw_rev_str.length);
+    max_char_length = MAX(max_char_length, dis_init.fw_rev_str.length);
+    max_char_length = MAX(max_char_length, dis_init.sw_rev_str.length);
+    if (dis_init.p_sys_id != NULL) {
+        max_char_length = MAX(max_char_length, sizeof(*dis_init.p_sys_id));
+    }
+    if (dis_init.p_reg_cert_data_list != NULL) {
+        max_char_length = MAX(max_char_length, dis_init.p_reg_cert_data_list->list_len);
+    }
+    if (dis_init.p_pnp_id != NULL) {
+        max_char_length = MAX(max_char_length, sizeof(*dis_init.p_pnp_id));
+    }
+
     err_code = ble_dis_init(&dis_init);
     APP_ERROR_CHECK(err_code);
     // endregion Initialize Device Information Service
@@ -283,6 +303,8 @@ void services_init(void) {
     bas_init.bl_rd_sec = SEC_OPEN;
     bas_init.bl_cccd_wr_sec = SEC_OPEN;
     bas_init.bl_report_rd_sec = SEC_OPEN;
+
+    max_char_length = MAX(max_char_length, (uint8_t) 2);
 
     err_code = ble_bas_init(&m_bas, &bas_init);
     APP_ERROR_CHECK(err_code);
@@ -311,6 +333,25 @@ void services_init(void) {
        err_code = ble_yy_service_init(&yys_init, &yy_init);
        APP_ERROR_CHECK(err_code);
      */
+
+
+    /* Now, when all of the characteristics are added, maximum length can be retrieved and the
+     * desired MTU size used for new connection can be updated to the length of the largest
+     * characteristics value for for the maximum performance.
+     *
+     * The ATT_MTU size can be modified freely between BLE_GATT_ATT_MTU_DEFAULT and NRF_SDH_BLE_GATT_MAX_MTU_SIZE.
+     * This value shall be updated before GATT initialization so all new connections will be updates to this
+     * desired MTU size. For the maximum performance this values should be set to the maximum length of any
+     * of the defined characteristic (but still limited to NRF_SDH_BLE_GATT_MAX_MTU_SIZE).
+     *
+     * There is also 1 byte used for the OP-code and 2 bytes for the Handle ID.
+     */
+    const uint16_t mtu_size = (uint16_t)
+        MIN(MAX(max_char_length + 3, (BLE_GATT_ATT_MTU_DEFAULT)), (NRF_SDH_BLE_GATT_MAX_MTU_SIZE));
+    NRF_LOG_DEBUG("Desired MTU size = %d (largest char. = %d)", mtu_size, max_char_length);
+
+    err_code = nrf_ble_gatt_att_mtu_periph_set(&m_gatt, mtu_size);
+    APP_ERROR_CHECK(err_code);
 }
 
 
@@ -324,7 +365,7 @@ void conn_params_init(void) {
     cp_init.max_conn_params_update_count = MAX_CONN_PARAMS_UPDATE_COUNT;
     cp_init.start_on_notify_cccd_handle = BLE_GATT_HANDLE_INVALID;
     cp_init.disconnect_on_fail = false;
-    cp_init.evt_handler = on_conn_params_evt;
+    cp_init.evt_handler = on_conn_params_event;
     cp_init.error_handler = app_error_handler_bare;
 
     err_code = ble_conn_params_init(&cp_init);
@@ -356,7 +397,7 @@ void peer_manager_init(void) {
     err_code = pm_sec_params_set(&sec_param);
     APP_ERROR_CHECK(err_code);
 
-    err_code = pm_register(pm_evt_handler);
+    err_code = pm_register(on_peer_manager_event);
     APP_ERROR_CHECK(err_code);
 }
 
@@ -369,23 +410,26 @@ void peer_manager_init(void) {
  * @param[in]   p_ble_evt   Bluetooth stack event.
  * @param[in]   p_context   Unused.
  */
-static void ble_evt_handler(ble_evt_t const *p_ble_evt, void *p_context) {
-    ret_code_t err_code = NRF_SUCCESS;
+static void on_ble_event(ble_evt_t const *p_ble_evt, void *p_context) {
+    ret_code_t err_code;
 
     switch (p_ble_evt->header.evt_id) {
-        case BLE_GAP_EVT_DISCONNECTED:
-            NRF_LOG_INFO("Disconnected.");
-            // LED indication will be changed when advertising starts.
-            break;
-
-        case BLE_GAP_EVT_CONNECTED:
+        case BLE_GAP_EVT_CONNECTED: {
+            // p_ble_evt->evt.gap_evt.params.connected
             NRF_LOG_INFO("Connected.");
             m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
             err_code = nrf_ble_qwr_conn_handle_assign(&m_qwr, m_conn_handle);
             APP_ERROR_CHECK(err_code);
             break;
-
+        }
+        case BLE_GAP_EVT_DISCONNECTED: {
+            // p_ble_evt->evt.gap_evt.params.disconnected
+            NRF_LOG_INFO("Disconnected.");
+            // LED indication will be changed when advertising starts.
+            break;
+        }
         case BLE_GAP_EVT_PHY_UPDATE_REQUEST: {
+            // p_ble_evt->evt.gap_evt.params.phy_update_request
             NRF_LOG_DEBUG("PHY update request.");
             ble_gap_phys_t const phys = {
                 .rx_phys = BLE_GAP_PHY_AUTO,
@@ -395,27 +439,81 @@ static void ble_evt_handler(ble_evt_t const *p_ble_evt, void *p_context) {
             APP_ERROR_CHECK(err_code);
             break;
         }
-
-        case BLE_GATTC_EVT_TIMEOUT:
+        case BLE_GATTC_EVT_TIMEOUT: {
             // Disconnect on GATT Client timeout event.
             NRF_LOG_DEBUG("GATT Client Timeout.");
             err_code = sd_ble_gap_disconnect(p_ble_evt->evt.gattc_evt.conn_handle,
                                              BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
             APP_ERROR_CHECK(err_code);
             break;
-
-        case BLE_GATTS_EVT_TIMEOUT:
+        }
+        case BLE_GATTS_EVT_TIMEOUT: {
             // Disconnect on GATT Server timeout event.
             NRF_LOG_DEBUG("GATT Server Timeout.");
             err_code = sd_ble_gap_disconnect(p_ble_evt->evt.gatts_evt.conn_handle,
                                              BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
             APP_ERROR_CHECK(err_code);
             break;
+        }
+        case BLE_GAP_EVT_SEC_PARAMS_REQUEST: {
+            // Pairing not supported.
+            err_code = sd_ble_gap_sec_params_reply(m_conn_handle, BLE_GAP_SEC_STATUS_PAIRING_NOT_SUPP, NULL, NULL);
+            APP_ERROR_CHECK(err_code);
+            break;
+        }
+        case BLE_GATTS_EVT_SYS_ATTR_MISSING: {
+            // No system attributes have been stored.
+            err_code = sd_ble_gatts_sys_attr_set(m_conn_handle, NULL, 0, 0);
+            APP_ERROR_CHECK(err_code);
+            break;
+        }
+        case BLE_EVT_USER_MEM_REQUEST: {
+            err_code = sd_ble_user_mem_reply(p_ble_evt->evt.gattc_evt.conn_handle, NULL);
+            APP_ERROR_CHECK(err_code);
+            break;
+        }
+        case BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST: {
+            ble_gap_data_length_params_t dl_params = {0};
+            // Clearing the struct will effectively set members to @ref BLE_GAP_DATA_LENGTH_AUTO.
+            err_code = sd_ble_gap_data_length_update(p_ble_evt->evt.gap_evt.conn_handle, &dl_params, NULL);
+            APP_ERROR_CHECK(err_code);
+            break;
+        }
+        case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST: {
+            const uint16_t mtu_requested = p_ble_evt->evt.gatts_evt.params.exchange_mtu_request.client_rx_mtu;
+            NRF_LOG_DEBUG("Exchange MTU Request (to %d for 0x%x)", mtu_requested, m_conn_handle);
 
+            err_code = sd_ble_gatts_exchange_mtu_reply(p_ble_evt->evt.gatts_evt.conn_handle, mtu_requested);
+            APP_ERROR_CHECK(err_code);
+            break;
+        }
         default:
             // No implementation needed.
             break;
     }
+}
+
+
+/**@brief Function for handling events from the GATT library.
+ */
+static void on_gatt_event(nrf_ble_gatt_t *p_gatt, nrf_ble_gatt_evt_t const *p_evt) {
+    switch (p_evt->evt_id) {
+        case NRF_BLE_GATT_EVT_ATT_MTU_UPDATED: {
+            NRF_LOG_INFO("ATT MTU updated (central %d, periph. %d) to %d B on connection 0x%x",
+                         p_gatt->att_mtu_desired_central, p_gatt->att_mtu_desired_periph,
+                         p_evt->params.att_mtu_effective, p_evt->conn_handle);
+            // Note that the actual payload length is att_mtu_effective - Op. Code length (1) - Handle length (2).
+            break;
+        }
+
+        case NRF_BLE_GATT_EVT_DATA_LENGTH_UPDATED:
+            NRF_LOG_INFO("ATT data length updated to %u B on connection 0x%x",
+                         p_evt->params.data_length, p_evt->conn_handle);
+            break;
+    }
+
+    // TODO: Call any service-specific GATT event handler or update their MTU/data sizes.
+    // ble_xxx_on_gatt_evt(&m_xxx, p_evt);
 }
 
 
@@ -425,7 +523,7 @@ static void ble_evt_handler(ble_evt_t const *p_ble_evt, void *p_context) {
  *
  * @param[in] ble_adv_evt  Advertising event.
  */
-static void on_adv_evt(ble_adv_evt_t ble_adv_evt) {
+static void on_advertising_event(ble_adv_evt_t ble_adv_evt) {
     // uint32_t err_code;
 
     switch (ble_adv_evt) {
@@ -454,7 +552,7 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt) {
  *
  * @param[in] p_evt  Event received from the Connection Parameters Module.
  */
-static void on_conn_params_evt(ble_conn_params_evt_t *p_evt) {
+static void on_conn_params_event(ble_conn_params_evt_t *p_evt) {
     ret_code_t err_code;
 
     if (p_evt->evt_type == BLE_CONN_PARAMS_EVT_FAILED) {
@@ -468,7 +566,7 @@ static void on_conn_params_evt(ble_conn_params_evt_t *p_evt) {
  *
  * @param[in] p_evt  Peer Manager event.
  */
-static void pm_evt_handler(pm_evt_t const *p_evt) {
+static void on_peer_manager_event(pm_evt_t const *p_evt) {
     pm_handler_on_pm_evt(p_evt);
     pm_handler_flash_clean(p_evt);
 
