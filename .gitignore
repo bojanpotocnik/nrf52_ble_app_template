@@ -5,6 +5,7 @@
 *.uvguix.*
 # Keil uVision build directories
 /**/_build/
+*Stub.scvd
 
 # Symbolic link to nRF5 SDK (device specific)
 nRF5_SDK_15

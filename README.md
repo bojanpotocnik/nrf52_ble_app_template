@@ -6,14 +6,20 @@ After many embedded projects, one can figure out that properly configuring CLion
 
 As a quick solution [CMake ⇄ µVision Synchronizer](https://github.com/bojanpotocnik/cmake-uvision-syncer) was created, however until that project is ready for the actual use, this template is used for new projects.
 
+
 ## Prerequisite
 
+#### Nordic's nRF5 SDK
 [Nordic's nRF5 SDK 15.0.2](http://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v15.x.x/) shall be located in the `nRF5_SDK_15` subdirectory.
 
 If the SDK is located somewhere else, symlink can be used.
 As example, if using Windows 10 and the SDK is located in `G:\SDK\nRF5_SDK_15.2.0_9412b96` then the symlink is created with the command:
 
 `mklink /D nRF5_SDK_15 G:\SDK\nRF5_SDK_15.2.0_9412b96`
+
+#### ARM Compiler paths configuration for CMake
+Machine-specific CMake file _[environment.cmake.template](environment.cmake.template)_ shall be copied to _environment.cmake_ and edited according to the host machine and AMR Compiler installation.
+
 
 ## Build
 

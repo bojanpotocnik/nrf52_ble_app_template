@@ -104,6 +104,28 @@
 
 #undef BOARD_DEFINITION_CUSTOM_HEADER_FILENAME
 
+// <q> CONFIG_GPIO_AS_PINRESET - Use one GPIO as a reset pin
+// <i> Configure GPIO pads as pPin Reset pin if Pin Reset capabilities desired.
+// <i> If CONFIG_GPIO_AS_PINRESET is not defined, pin reset will not be available.
+// <i> One GPIO (see Product Specification to see which one) will then be reserved
+// <i>  for PinReset and not available as normal GPIO.
+#ifndef SDK_CONFIG__CONFIG_GPIO_AS_PINRESET
+#define SDK_CONFIG__CONFIG_GPIO_AS_PINRESET 0
+#endif
+
+// SDK `#ifdef CONFIG_GPIO_AS_PINRESET` therefore defining 0/1 is not correct.
+#if (SDK_CONFIG__CONFIG_GPIO_AS_PINRESET)
+#ifndef CONFIG_GPIO_AS_PINRESET
+#define CONFIG_GPIO_AS_PINRESET
+#endif
+#else
+#ifdef CONFIG_GPIO_AS_PINRESET
+#undef CONFIG_GPIO_AS_PINRESET
+#endif
+#endif
+#undef SDK_CONFIG__CONFIG_GPIO_AS_PINRESET
+
+
 // </h>
 //==========================================================
 
@@ -293,7 +315,7 @@
 // <e> BLE_BAS_ENABLED - ble_bas - Battery Service
 //==========================================================
 #ifndef BLE_BAS_ENABLED
-#define BLE_BAS_ENABLED 0
+#define BLE_BAS_ENABLED 1
 #endif
 // <e> BLE_BAS_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
@@ -366,7 +388,7 @@
 
 
 #ifndef BLE_DIS_ENABLED
-#define BLE_DIS_ENABLED 0
+#define BLE_DIS_ENABLED 1
 #endif
 
 // <q> BLE_GLS_ENABLED  - ble_gls - Glucose Service

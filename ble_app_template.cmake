@@ -3,7 +3,7 @@
 
 # Common definitions
 set(DEFINES_COMMON
-	-DCONFIG_GPIO_AS_PINRESET
+	-DDEBUG
 	-DFLOAT_ABI_HARD
 	-DNRF52840_XXAA
 	-DNRF_SD_BLE_API_VERSION=6
@@ -198,11 +198,15 @@ set(SOURCES_C
 	# Application
 	main.c
 	version/version.c
+	# BLE
+	ble/app_ble.c
+	nRF5_SDK_15/components/ble/ble_services/ble_dis/ble_dis.c
+	nRF5_SDK_15/components/ble/ble_services/ble_bas/ble_bas.c
 	# Board Definition
 	nRF5_SDK_15/components/boards/boards.c
 	# Board Support
-	nRF5_SDK_15/components/libraries/bsp/bsp.c
-	nRF5_SDK_15/components/libraries/bsp/bsp_btn_ble.c
+	# nRF5_SDK_15/components/libraries/bsp/bsp.c
+	# nRF5_SDK_15/components/libraries/bsp/bsp_btn_ble.c
 	# UTF8/UTF16 converter
 	nRF5_SDK_15/external/utf_converter/utf.c
 	# nRF_BLE
@@ -226,8 +230,6 @@ set(SOURCES_C
 	nRF5_SDK_15/components/ble/peer_manager/security_dispatcher.c
 	nRF5_SDK_15/components/ble/peer_manager/security_manager.c
 	# nRF_Drivers
-	nRF5_SDK_15/integration/nrfx/legacy/nrf_drv_clock.c
-	nRF5_SDK_15/integration/nrfx/legacy/nrf_drv_uart.c
 	nRF5_SDK_15/modules/nrfx/drivers/src/nrfx_clock.c
 	nRF5_SDK_15/modules/nrfx/drivers/src/nrfx_gpiote.c
 	nRF5_SDK_15/modules/nrfx/drivers/src/nrfx_power_clock.c
@@ -275,8 +277,6 @@ set(SOURCES_C
 	nRF5_SDK_15/components/softdevice/common/nrf_sdh.c
 	nRF5_SDK_15/components/softdevice/common/nrf_sdh_ble.c
 	nRF5_SDK_15/components/softdevice/common/nrf_sdh_soc.c
-	# Application - BLE
-	ble/app_ble.c
 	# RTE::Device
 	RTE/Device/nRF52840_xxAA/system_nrf52840.c
 )
@@ -286,4 +286,6 @@ set(SOURCES_C
 set(OTHER_FILES
 	# Application
 	config/sdk_config.h
+	# BLE
+	config/ble_config.h
 )
