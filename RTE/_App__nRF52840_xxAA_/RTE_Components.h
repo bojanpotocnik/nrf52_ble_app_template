@@ -4,7 +4,7 @@
  *      *** Do not modify ! ***
  *
  * Project: 'ble_app_template' 
- * Target:  'nrf52840_xxaa' 
+ * Target:  'App (nRF52840_xxAA)' 
  */
 
 #ifndef RTE_COMPONENTS_H

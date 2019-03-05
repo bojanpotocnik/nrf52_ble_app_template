@@ -28,6 +28,7 @@
 #include "nrf_log_default_backends.h"
 
 #include "app_ble.h"
+#include "version.h"
 
 
 /**@brief Function for the Timer initialization.
@@ -89,6 +90,9 @@ static void log_init(void) {
     APP_ERROR_CHECK(err_code);
 
     NRF_LOG_DEFAULT_BACKENDS_INIT();
+
+    NRF_LOG_DEBUG("\r\n\r\n##### v%d.%d.%d compiled on %s at %s #####\r\n",
+        VERSION_FW_MAJOR, VERSION_FW_MINOR, VERSION_FW_BUILD, VERSION_FW_BUILD_DATE, VERSION_FW_BUILD_TIME);
 }
 
 
@@ -131,6 +135,7 @@ int main(void) {
 
     // Start execution.
     NRF_LOG_INFO("Template example started.");
+    NRF_LOG_FLUSH();
     application_timers_start();
 
     advertising_start(erase_bonds);

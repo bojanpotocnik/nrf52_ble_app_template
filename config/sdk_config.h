@@ -46,6 +46,7 @@
 #ifdef USE_APP_CONFIG
 #include "app_config.h"
 #endif
+
 // <h> Board definition
 //==========================================================
 // <e> Custom file name for board definition header file
@@ -73,33 +74,33 @@
 //     <0xB01A006=> ARDUINO_PRIMO
 //     <0xB01A007=> CUSTOM
 //     <0xB01A008=> Custom include file
-#ifndef BOARD_NUMBER_SDK_CONFIG_
-#define BOARD_NUMBER_SDK_CONFIG_ 0xB01A002
+#ifndef SDK_CONFIG__BOARD_NUMBER
+#define SDK_CONFIG__BOARD_NUMBER 0xB01A007
 #endif
 
-#if (BOARD_NUMBER_SDK_CONFIG_ == 0xB01A000)
+#if (SDK_CONFIG__BOARD_NUMBER == 0xB01A000)
 #define BOARD_PCA10036
-#elif (BOARD_NUMBER_SDK_CONFIG_ == 0xB01A001)
+#elif (SDK_CONFIG__BOARD_NUMBER == 0xB01A001)
 #define BOARD_PCA10040
-#elif (BOARD_NUMBER_SDK_CONFIG_ == 0xB01A002)
+#elif (SDK_CONFIG__BOARD_NUMBER == 0xB01A002)
 #define BOARD_PCA10056
-#elif (BOARD_NUMBER_SDK_CONFIG_ == 0xB01A003)
+#elif (SDK_CONFIG__BOARD_NUMBER == 0xB01A003)
 #define BOARD_PCA20020
-#elif (BOARD_NUMBER_SDK_CONFIG_ == 0xB01A004)
+#elif (SDK_CONFIG__BOARD_NUMBER == 0xB01A004)
 #define BOARD_PCA10059
-#elif (BOARD_NUMBER_SDK_CONFIG_ == 0xB01A005)
+#elif (SDK_CONFIG__BOARD_NUMBER == 0xB01A005)
 #define BOARD_PCA10056
-#elif (BOARD_NUMBER_SDK_CONFIG_ == 0xB01A006)
+#elif (SDK_CONFIG__BOARD_NUMBER == 0xB01A006)
 #define BOARD_ARDUINO_PRIMO
-#elif (BOARD_NUMBER_SDK_CONFIG_ == 0xB01A007)
+#elif (SDK_CONFIG__BOARD_NUMBER == 0xB01A007)
 #define BOARD_CUSTOM
-#elif (BOARD_NUMBER_SDK_CONFIG_ == 0xB01A008)
+#elif (SDK_CONFIG__BOARD_NUMBER == 0xB01A008)
 #error "Please use CUSTOM_BOARD_INC (BOARD_DEFINITION_CUSTOM_HEADER_FILENAME) definition for this option"
 #else
 #error "Please define the board or specify custom board configuration file header name"
 #endif
 
-#undef BOARD_NUMBER_SDK_CONFIG_
+#undef SDK_CONFIG__BOARD_NUMBER
 #endif // !BOARD_DEFINITION_CUSTOM_HEADER_FILENAME
 
 #undef BOARD_DEFINITION_CUSTOM_HEADER_FILENAME
@@ -2427,6 +2428,34 @@
 
 // </e>
 
+// <e> NRFX_PWM_NRF52_ANOMALY_109_WORKAROUND_ENABLED - Enables nRF52 Anomaly 109 workaround for PWM.
+
+// <i> The workaround uses interrupts to wake up the CPU and ensure
+// <i> it is active when PWM is about to start a DMA transfer. For
+// <i> initial transfer, done when a playback is started via PPI,
+// <i> a specific EGU instance is used to generate the interrupt.
+// <i> During the playback, the PWM interrupt triggered on SEQEND
+// <i> event of a preceding sequence is used to protect the transfer
+// <i> done for the next sequence to be played.
+//==========================================================
+#ifndef NRFX_PWM_NRF52_ANOMALY_109_WORKAROUND_ENABLED
+#define NRFX_PWM_NRF52_ANOMALY_109_WORKAROUND_ENABLED 0
+#endif
+// <o> NRFX_PWM_NRF52_ANOMALY_109_EGU_INSTANCE  - EGU instance used by the nRF52 Anomaly 109 workaround for PWM.
+
+// <0=> EGU0
+// <1=> EGU1
+// <2=> EGU2
+// <3=> EGU3
+// <4=> EGU4
+// <5=> EGU5
+
+#ifndef NRFX_PWM_NRF52_ANOMALY_109_EGU_INSTANCE
+#define NRFX_PWM_NRF52_ANOMALY_109_EGU_INSTANCE 5
+#endif
+
+// </e>
+
 // </e>
 
 // <e> NRFX_QDEC_ENABLED - nrfx_qdec - QDEC peripheral driver
@@ -3125,6 +3154,20 @@
 
 // </e>
 
+// <q> NRFX_SPIM_NRF52_ANOMALY_109_WORKAROUND_ENABLED  - Enables nRF52 anomaly 109 workaround for SPIM.
+
+
+// <i> The workaround uses interrupts to wake up the CPU by catching
+// <i> a start event of zero-length transmission to start the clock. This
+// <i> ensures that the DMA transfer will be executed without issues and
+// <i> that the proper transfer will be started. See more in the Errata
+// <i> document or Anomaly 109 Addendum located at
+// <i> https://infocenter.nordicsemi.com/
+
+#ifndef NRFX_SPIM_NRF52_ANOMALY_109_WORKAROUND_ENABLED
+#define NRFX_SPIM_NRF52_ANOMALY_109_WORKAROUND_ENABLED 0
+#endif
+
 // </e>
 
 // <e> NRFX_SPIS_ENABLED - nrfx_spis - SPIS peripheral driver
@@ -3232,6 +3275,20 @@
 #endif
 
 // </e>
+
+// <q> NRFX_SPIS_NRF52_ANOMALY_109_WORKAROUND_ENABLED  - Enables nRF52 Anomaly 109 workaround for SPIS.
+
+
+// <i> The workaround uses a GPIOTE channel to generate interrupts
+// <i> on falling edges detected on the CSN line. This will make
+// <i> the CPU active for the moment when SPIS starts DMA transfers,
+// <i> and this way the transfers will be protected.
+// <i> This workaround uses GPIOTE driver, so this driver must be
+// <i> enabled as well.
+
+#ifndef NRFX_SPIS_NRF52_ANOMALY_109_WORKAROUND_ENABLED
+#define NRFX_SPIS_NRF52_ANOMALY_109_WORKAROUND_ENABLED 0
+#endif
 
 // </e>
 
@@ -3692,6 +3749,19 @@
 #endif
 
 // </e>
+
+// <q> NRFX_TWIM_NRF52_ANOMALY_109_WORKAROUND_ENABLED  - Enables nRF52 anomaly 109 workaround for TWIM.
+
+
+// <i> The workaround uses interrupts to wake up the CPU by catching
+// <i> the start event of zero-frequency transmission, clear the
+// <i> peripheral, set desired frequency, start the peripheral, and
+// <i> the proper transmission. See more in the Errata document or
+// <i> Anomaly 109 Addendum located at https://infocenter.nordicsemi.com/
+
+#ifndef NRFX_TWIM_NRF52_ANOMALY_109_WORKAROUND_ENABLED
+#define NRFX_TWIM_NRF52_ANOMALY_109_WORKAROUND_ENABLED 0
+#endif
 
 // </e>
 
@@ -4997,7 +5067,7 @@
 
 
 #ifndef HARDFAULT_HANDLER_ENABLED
-#define HARDFAULT_HANDLER_ENABLED 0
+#define HARDFAULT_HANDLER_ENABLED 1
 #endif
 
 // <e> HCI_MEM_POOL_ENABLED - hci_mem_pool - memory pool implementation used by HCI
@@ -9803,6 +9873,16 @@
 
 // </e>
 
+// <o> HAL_NFC_FIELD_TIMER_PERIOD - TIMER4 period in us (used for workaround).  <100-10000>
+
+
+// <i> This value is used as a timeout for polling NFC field to detect FIELDLOST event.
+// <i> This value can affect Tag behavior.
+
+#ifndef HAL_NFC_FIELD_TIMER_PERIOD
+#define HAL_NFC_FIELD_TIMER_PERIOD 100
+#endif
+
 // </e>
 
 // <e> NFC_T2T_PARSER_ENABLED - nfc_type_2_tag_parser - Parser for decoding Type 2 Tag data
@@ -10615,6 +10695,16 @@
 
 // </e>
 
+// <o> HAL_NFC_FIELD_TIMER_PERIOD - TIMER4 period in us (used for workaround).  <100-10000>
+
+
+// <i> This value is used as a timeout for polling NFC field to detect FIELDLOST event.
+// <i> This value can affect Tag behavior.
+
+#ifndef HAL_NFC_FIELD_TIMER_PERIOD
+#define HAL_NFC_FIELD_TIMER_PERIOD 100
+#endif
+
 // </e>
 
 // <e> NFC_T4T_HL_DETECTION_PROCEDURES_ENABLED - nfc_t4t_hl_detection_procedures - NDEF Detection Procedure for Type 4 Tag
@@ -11331,6 +11421,8 @@
 
 #if ((NRFX_CLOCK_CONFIG_LF_SRC) == 0) && ((NRF_SDH_CLOCK_LF_RC_CTIV) != 16)
 #warning "NRF_SDH_CLOCK_LF_RC_CTIV shall be set to 16 if NRFX_CLOCK_CONFIG_LF_SRC is set to RC"
+#elif ((NRFX_CLOCK_CONFIG_LF_SRC) != 0) && ((NRF_SDH_CLOCK_LF_RC_CTIV) != 0)
+#error "NRF_SDH_CLOCK_LF_RC_CTIV must be 0 if NRFX_CLOCK_CONFIG_LF_SRC is not NRF_CLOCK_LF_SRC_RC"
 #endif
 
 // <o> NRF_SDH_CLOCK_LF_RC_TEMP_CTIV - SoftDevice calibration timer interval under constant temperature.
@@ -11338,11 +11430,13 @@
 // <i>  if the temperature has not changed.
 // <i> Shall be set to 4 if NRFX_CLOCK_CONFIG_LF_SRC == RC, otherwise 0.
 #ifndef NRF_SDH_CLOCK_LF_RC_TEMP_CTIV
-#define NRF_SDH_CLOCK_LF_RC_TEMP_CTIV 4
+#define NRF_SDH_CLOCK_LF_RC_TEMP_CTIV 2
 #endif
 
-#if ((NRFX_CLOCK_CONFIG_LF_SRC) == 0) && ((NRF_SDH_CLOCK_LF_RC_TEMP_CTIV) != 4)
-#warning "NRF_SDH_CLOCK_LF_RC_TEMP_CTIV shall be set to 4 if NRFX_CLOCK_CONFIG_LF_SRC is set to RC"
+#if ((NRFX_CLOCK_CONFIG_LF_SRC) == 0) && ((NRF_SDH_CLOCK_LF_RC_TEMP_CTIV) != 2)
+#warning "NRF_SDH_CLOCK_LF_RC_TEMP_CTIV shall be set to 2 if NRFX_CLOCK_CONFIG_LF_SRC is set to RC"
+#elif ((NRFX_CLOCK_CONFIG_LF_SRC) != 0) && ((NRF_SDH_CLOCK_LF_RC_TEMP_CTIV) != 0)
+#error "NRF_SDH_CLOCK_LF_RC_TEMP_CTIV must be 0 if NRFX_CLOCK_CONFIG_LF_SRC is not NRF_CLOCK_LF_SRC_RC"
 #endif
 
 

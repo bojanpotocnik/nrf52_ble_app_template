@@ -1,10 +1,14 @@
 # PyCharm
 .idea/misc.xml
 
-# Keil uVision workspace files
+## Keil uVision
+# Workspace files
 *.uvguix.*
-# Keil uVision build directories
+# Project options files (containing user and machine specific settings)
+*.uvoptx
+# Build directories
 /**/_build/
+# Other generated files
 *Stub.scvd
 
 # Symbolic link to nRF5 SDK (device specific)

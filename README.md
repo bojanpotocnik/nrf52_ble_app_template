@@ -24,3 +24,12 @@ Machine-specific CMake file _[environment.cmake.template](environment.cmake.temp
 ## Build
 
 Building is done using Keil uVision using the project file [ble_app_template.uvprojx](ble_app_template.uvprojx).
+
+
+## Downloading and running
+
+As the _ble_app_template.uv**opt**x_ file is excluded from this repository, the debugger settings are also lost
+ (they are per-user-hardware specific anyway).
+Take note that when the debugger is selected in µVision (under _Options for Target..._ → _Debug_) one should also
+ tick _Download and Run_ checkbox in _Download Function_ section on _Flash Download_ tab in the debugger settings.
+ This checkbox is not enabled by default, but can cause _a lot_ of frustration when just pressing _Download_ button and wondering why the program does not work, despite being identical to example project.

@@ -6,11 +6,15 @@
       <w>bootloader</w>
       <w>cmsis</w>
       <w>keil</w>
+      <w>leds</w>
+      <w>lxml</w>
       <w>microcontrollers</w>
       <w>periph</w>
       <w>potočnik</w>
+      <w>projx</w>
       <w>uuids</w>
       <w>uvprojx</w>
+      <w>xproj</w>
     </words>
   </dictionary>
 </component>

@@ -193,7 +193,7 @@ void gap_params_init(void) {
     ret_code_t err_code;
     ble_gap_conn_params_t gap_conn_params = {0};
 
-    set_ble_device_name(DEVICE_NAME);
+    ble_set_device_name(DEVICE_NAME);
 
     // YOUR_JOB: Use an appearance value matching the application's use case.
     err_code = sd_ble_gap_appearance_set(BLE_APPEARANCE_UNKNOWN);
@@ -228,6 +228,7 @@ void advertising_init(void) {
     err_code = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, m_advertising.adv_handle, m_tx_power);
     APP_ERROR_CHECK(err_code);
 }
+
 
 void services_init(void) {
     ret_code_t err_code;
